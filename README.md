@@ -1,4 +1,6 @@
-# Sugarcane Juice Quality Prediction System
+# Here you go 😄
+
+🌾Sugarcane Juice Quality Prediction System
 
 This project is a full-stack application designed to predict the quality of sugarcane juice based on various chemical and physical parameters. It utilizes a Machine Learning model to analyze input data and provide quality assessments, explanations, and improvement suggestions.
 
