@@ -31,8 +31,7 @@ Navigate to the `backend` directory and install the required Python packages.
 ```bash
 cd backend
 # Create a virtual environment (optional but recommended)
-# python -m venv venv
-# source venv/bin/activate  # On Windows: venv\Scripts\activate
+# .\venv\Scripts\Activate.ps1
 
 # Install dependencies
 pip install flask flask-cors pandas numpy joblib scikit-learn
