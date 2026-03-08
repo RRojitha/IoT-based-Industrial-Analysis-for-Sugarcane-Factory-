@@ -194,6 +194,12 @@ function App() {
               <select name="variety" value={formData.variety} onChange={handleChange}>
                 <option value="Co86032">CO86032 (High Yield)</option>
                 <option value="Co0238">CO0238 (Early Spec)</option>
+                <option value="BO91">BO91 (All-Weather)</option>
+                <option value="COC671">COC671 (High Sugar)</option>
+                <option value="BO91">BO110 (Premium)</option>
+                <option value="BO91">BO138 (Standard)</option>
+                <option value="Co0238">CoJ64 (Early)</option>
+                <option value="Co86032">Other/Local (Select Nearest)</option>
               </select>
             </div>
 

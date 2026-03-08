@@ -40,8 +40,10 @@ def get_prediction_data(data):
     # Normalize variety names to match encoder
     variety_raw = data.get("variety", "Co86032")
     variety_map = {
-        "CO86032": "Co86032",
-        "CO0238": "Co0238"
+        "CO86032": "CO86032",
+        "CO0238": "Co0238",
+        "BO91": "BO91",
+        "COC671": "COC671"
     }
     variety = variety_map.get(variety_raw.upper(), variety_raw)
     
