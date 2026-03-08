@@ -34,10 +34,11 @@ cd backend
 # .\venv\Scripts\Activate.ps1
 
 # Install dependencies
-pip install flask flask-cors pandas numpy joblib scikit-learn
+python -m pip install flask flask-cors pandas numpy joblib scikit-learn
+
 ```
 
-Ensure that the model files (`juice_quality_model.pkl`, `quality_encoder.pkl`, `variety_encoder.pkl`) are present in the `backend` directory.
+Ensure that the model files (`juice_quality_model.pkl`, `quality_encoder.pkl`, `variety_encoder.pkl`,`production_model.pkl`) are present in the `backend` directory.
 
 To run the backend server:
 
