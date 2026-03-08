@@ -424,6 +424,70 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
+/* Production Estimates Styling */
+.production-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.production-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  padding: 1.2rem;
+  border-radius: 16px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.production-card:hover {
+  transform: translateY(-5px);
+  background: white;
+}
+
+.production-icon {
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+  opacity: 0.8;
+}
+
+.production-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.production-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.2rem;
+}
+
+.estimate-header {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.estimate-header::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--glass-border);
+}
+
 /* Mobile Responsive */
 @media (max-width: 600px) {
   .app-container {

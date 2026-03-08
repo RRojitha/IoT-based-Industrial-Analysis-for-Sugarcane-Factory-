@@ -17,7 +17,10 @@ import {
   Info,
   Upload,
   RefreshCw,
-  Zap
+  Zap,
+  TrendingUp,
+  Package,
+  Container
 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:5000';
@@ -31,7 +34,7 @@ function App() {
   const [batchResults, setBatchResults] = useState(null);
 
   const [formData, setFormData] = useState({
-    variety: 'CO86032',
+    variety: 'Co86032',
     age: 0,
     brix: 0,
     sucrose: 0,
@@ -94,11 +97,7 @@ function App() {
   };
 
   const reset = () => {
-    setStep(1);
-    setResult(null);
-    setBatchResults(null);
-    setError(null);
-    setIsWhatIfMode(false);
+    window.location.reload();
   };
 
   const toggleWhatIf = () => {
@@ -193,10 +192,8 @@ function App() {
             <div className="form-group">
               <label>Cane Variety</label>
               <select name="variety" value={formData.variety} onChange={handleChange}>
-                <option value="CO86032">CO86032 (High Yield)</option>
-                <option value="CO0238">CO0238 (Early Spec)</option>
-                <option value="COJ64">COJ64 (Standard)</option>
-                <option value="Local">Local Variety</option>
+                <option value="Co86032">CO86032 (High Yield)</option>
+                <option value="Co0238">CO0238 (Early Spec)</option>
               </select>
             </div>
 
@@ -290,10 +287,15 @@ function App() {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mini-result">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
                   <span>Real-time Prediction:</span>
-                  <strong style={{ color: getQualityColor(result.Predicted_Quality || result.quality) }}>
-                    {(result.Predicted_Quality || result.quality).toUpperCase()}
-                  </strong>
+                  <strong>{(result.Predicted_Quality || result.quality).toUpperCase()}</strong>
                 </div>
+
+                {result.Production_Estimates?.Sugar_Recovery_Percent && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginTop: '0.5rem', fontSize: '0.85rem' }}>
+                    <span>Estimated Recovery:</span>
+                    <strong style={{ color: 'var(--primary)' }}>{result.Production_Estimates.Sugar_Recovery_Percent}%</strong>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -335,6 +337,36 @@ function App() {
               )}
             </div>
 
+            {result.Production_Estimates && (
+              <div className="production-section fade-in">
+                <div className="estimate-header">
+                  <TrendingUp size={20} /> Production Estimates (Per Ton)
+                </div>
+                <div className="production-grid">
+                  <div className="production-card">
+                    <div className="production-icon"><TrendingUp size={24} /></div>
+                    <span className="production-value">{(result.Production_Estimates.Sugar_Recovery_Percent ?? 0).toFixed(2)}%</span>
+                    <span className="production-label">Sugar Recovery</span>
+                  </div>
+                  <div className="production-card">
+                    <div className="production-icon"><Package size={24} /></div>
+                    <span className="production-value">{(result.Production_Estimates.Sugar_kg_per_ton ?? 0).toFixed(2)} kg</span>
+                    <span className="production-label">Sugar Amount</span>
+                  </div>
+                  <div className="production-card">
+                    <div className="production-icon"><Droplets size={24} /></div>
+                    <span className="production-value">{(result.Production_Estimates.Molasses_kg_per_ton ?? 0).toFixed(2)} kg</span>
+                    <span className="production-label">Molasses</span>
+                  </div>
+                  <div className="production-card">
+                    <div className="production-icon"><Wind size={24} /></div>
+                    <span className="production-value">{(result.Production_Estimates.Bagasse_kg_per_ton ?? 0).toFixed(2)} kg</span>
+                    <span className="production-label">Bagasse</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
               <button className="btn-primary" style={{ flex: 2 }} onClick={reset}>New Prediction</button>
               <button className="btn-secondary" style={{ flex: 1 }} onClick={toggleWhatIf}>Simulation Mode</button>
@@ -353,6 +385,7 @@ function App() {
                   <tr>
                     <th>Sample ID</th>
                     <th>Predicted Quality</th>
+                    <th>Recovery %</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -364,6 +397,9 @@ function App() {
                         <span className={`badge-status ${res.Quality.toLowerCase()}`}>
                           {res.Quality.toUpperCase()}
                         </span>
+                      </td>
+                      <td style={{ fontWeight: 600, color: 'var(--primary)' }}>
+                        {res.Sugar_Recovery}%
                       </td>
                       <td>
                         <button className="btn-text">View Details</button>
