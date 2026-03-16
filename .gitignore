@@ -19,3 +19,5 @@ dist/
 *.json
 !package.json
 !composer.json
+!backend/requirements.txt
+!backend/varieties.txt
