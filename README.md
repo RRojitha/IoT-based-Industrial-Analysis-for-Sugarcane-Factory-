@@ -2,6 +2,8 @@
 
 This project is a full-stack application designed to predict the quality of sugarcane juice based on various chemical and physical parameters. It utilizes a Machine Learning model to analyze input data and provide quality assessments, explanations, and improvement suggestions.
 
+### 🚀 [Live Demo](https://iot-based-industrial-analysis-for.onrender.com/) | 🛠️ [Backend API](https://sugarcane-api-bcgm.onrender.com/predict)
+
 ## Project Structure
 
 The project is divided into two main parts:
