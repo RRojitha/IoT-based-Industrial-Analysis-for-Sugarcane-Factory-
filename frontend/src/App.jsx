@@ -32,9 +32,11 @@ function App() {
   const [error, setError] = useState(null);
   const [isWhatIfMode, setIsWhatIfMode] = useState(false);
   const [batchResults, setBatchResults] = useState(null);
+  const [analyticsData, setAnalyticsData] = useState(null);
 
   const [formData, setFormData] = useState({
-    variety: 'Co86032',
+    variety: 'CO86032',
+    location: '',
     age: 0,
     brix: 0,
     sucrose: 0,
@@ -43,6 +45,20 @@ function App() {
     moisture: 0,
     autoPurity: true
   });
+
+  // Fetch Analytics
+  const fetchAnalytics = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/analytics`);
+      setAnalyticsData(response.data);
+    } catch (err) {
+      console.error("Analytics fetch failed", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   // Auto-calculate purity
   useEffect(() => {
@@ -84,13 +100,17 @@ function App() {
         fiber: formData.fiber,
         moisture: formData.moisture,
         variety: formData.variety,
+        location: formData.location,
         age: formData.age
       });
       setResult(response.data);
-      if (!hidden) setStep(3);
+      if (!hidden) {
+        setStep(3);
+        fetchAnalytics();
+      }
     } catch (err) {
       console.error(err);
-      if (!hidden) setError("Failed to connect to backend. Ensure Flask is running on port 5000.");
+      if (!hidden) setError("Failed to connect to backend. Ensure Flask and MongoDB are running.");
     } finally {
       if (!hidden) setLoading(false);
     }
@@ -152,6 +172,11 @@ function App() {
     a.click();
   };
 
+  const showAnalytics = () => {
+    fetchAnalytics();
+    setStep(5);
+  };
+
   // Interaction check to hide hints/predictions when values are zero
   const hasInteracted = formData.brix > 0 || formData.sucrose > 0 || formData.fiber > 0 || formData.age > 0;
 
@@ -168,39 +193,54 @@ function App() {
 
   return (
     <div className="app-container">
-      <header>
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1>Smart Sugarcane Quality Analysis</h1>
-          <p className="subtitle">Industrial Extraction & Quality Prediction System</p>
-        </motion.div>
+      <header className="main-header">
+        <div className="header-content">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+            <h1>Smart Sugarcane Quality Analysis</h1>
+            <p className="subtitle">Industrial Extraction & Quality Prediction System</p>
+          </motion.div>
+        </div>
+        <button className="btn-analytics-toggle" onClick={showAnalytics}>
+          <TrendingUp size={20} /> Analytics Dashboard
+        </button>
       </header>
 
       <div className="steps-indicator">
+{/* ... */}
         <div className={`step-dot ${step >= 1 ? 'active' : ''}`} />
         <div className={`step-dot ${step >= 2 ? 'active' : ''}`} />
         <div className={`step-dot ${step >= 3 || step === 4 ? 'active' : ''}`} />
-        {step === 4 && <div className={`step-dot active`} />}
+        {step === 5 && <div className={`step-dot active`} />}
       </div>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-card">
             <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-              <Leaf className="text-primary" /> 1. Cane Identity
+              <Leaf className="text-primary" /> 1. Cane Identity & Origin
             </h2>
 
-            <div className="form-group">
-              <label>Cane Variety</label>
-              <select name="variety" value={formData.variety} onChange={handleChange}>
-                <option value="Co86032">CO86032 (High Yield)</option>
-                <option value="Co0238">CO0238 (Early Spec)</option>
-                <option value="BO91">BO91 (All-Weather)</option>
-                <option value="COC671">COC671 (High Sugar)</option>
-                <option value="BO91">BO110 (Premium)</option>
-                <option value="BO91">BO138 (Standard)</option>
-                <option value="Co0238">CoJ64 (Early)</option>
-                <option value="Co86032">Other/Local (Select Nearest)</option>
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+              <div className="form-group">
+                <label>Extraction Location (Village)</label>
+                <input 
+                  type="text" 
+                  name="location" 
+                  value={formData.location} 
+                  onChange={handleChange} 
+                  placeholder="Eg: Perundurai"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Cane Variety</label>
+                <select name="variety" value={formData.variety} onChange={handleChange}>
+                  <option value="CO86032">CO86032 (High Yield)</option>
+                  <option value="Co0238">CO0238 (Early Spec)</option>
+                  <option value="BO91">BO91 (All-Weather)</option>
+                  <option value="COC671">COC671 (High Sugar)</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
@@ -212,7 +252,7 @@ function App() {
               </div>
             </div>
 
-            <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed var(--border)', textAlign: 'center' }}>
+            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px dashed var(--border)', textAlign: 'center' }}>
               <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', cursor: 'pointer', margin: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600 }}>
                   <Upload size={20} /> Upload CSV for Bulk Analysis
@@ -335,38 +375,28 @@ function App() {
                   <strong>Action Suggestion:</strong> {result.Suggestion}
                 </p>
               )}
-              {result.detected_issues?.length > 0 && (
-                <div className="issues-section">
-                  <h4>Detected Factors:</h4>
-                  <ul>{result.detected_issues.map((iss, i) => <li key={i}>{iss}</li>)}</ul>
-                </div>
-              )}
             </div>
 
             {result.Production_Estimates && (
               <div className="production-section fade-in">
-                <div className="estimate-header">
+                <div className="estimate-header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--primary)', fontWeight: 600 }}>
                   <TrendingUp size={20} /> Production Estimates (Per Ton)
                 </div>
-                <div className="production-grid">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                   <div className="production-card">
-                    <div className="production-icon"><TrendingUp size={24} /></div>
                     <span className="production-value">{(result.Production_Estimates.Sugar_Recovery_Percent ?? 0).toFixed(2)}%</span>
-                    <span className="production-label">Sugar Recovery</span>
+                    <span className="production-label">Recovery</span>
                   </div>
                   <div className="production-card">
-                    <div className="production-icon"><Package size={24} /></div>
-                    <span className="production-value">{(result.Production_Estimates.Sugar_kg_per_ton ?? 0).toFixed(2)} kg</span>
-                    <span className="production-label">Sugar Amount</span>
+                    <span className="production-value">{(result.Production_Estimates.Sugar_kg_per_ton ?? 0).toFixed(2)}kg</span>
+                    <span className="production-label">Sugar</span>
                   </div>
                   <div className="production-card">
-                    <div className="production-icon"><Droplets size={24} /></div>
-                    <span className="production-value">{(result.Production_Estimates.Molasses_kg_per_ton ?? 0).toFixed(2)} kg</span>
+                    <span className="production-value">{(result.Production_Estimates.Molasses_kg_per_ton ?? 0).toFixed(2)}kg</span>
                     <span className="production-label">Molasses</span>
                   </div>
                   <div className="production-card">
-                    <div className="production-icon"><Wind size={24} /></div>
-                    <span className="production-value">{(result.Production_Estimates.Bagasse_kg_per_ton ?? 0).toFixed(2)} kg</span>
+                    <span className="production-value">{(result.Production_Estimates.Bagasse_kg_per_ton ?? 0).toFixed(2)}kg</span>
                     <span className="production-label">Bagasse</span>
                   </div>
                 </div>
@@ -385,40 +415,76 @@ function App() {
             <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
               <Activity className="text-primary" /> 4. Batch Processing Results
             </h2>
-            <div className="table-container">
-              <table className="batch-table">
+            <div className="table-container" style={{ overflowX: 'auto' }}>
+              <table className="batch-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr>
-                    <th>Sample ID</th>
-                    <th>Predicted Quality</th>
-                    <th>Recovery %</th>
-                    <th>Action</th>
+                  <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '1rem' }}>Sample ID</th>
+                    <th style={{ padding: '1rem' }}>Predicted Quality</th>
+                    <th style={{ padding: '1rem' }}>Recovery %</th>
                   </tr>
                 </thead>
                 <tbody>
                   {batchResults.map((res, i) => (
-                    <tr key={i}>
-                      <td>{res.Sample_ID}</td>
-                      <td>
-                        <span className={`badge-status ${res.Quality.toLowerCase()}`}>
-                          {res.Quality.toUpperCase()}
-                        </span>
+                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ padding: '1rem' }}>{res.Sample_ID}</td>
+                      <td style={{ padding: '1rem' }}>
+                        <span style={{ color: getQualityColor(res.Quality), fontWeight: 600 }}>{res.Quality.toUpperCase()}</span>
                       </td>
-                      <td style={{ fontWeight: 600, color: 'var(--primary)' }}>
-                        {res.Sugar_Recovery}%
-                      </td>
-                      <td>
-                        <button className="btn-text">View Details</button>
-                      </td>
+                      <td style={{ padding: '1rem', fontWeight: 600, color: 'var(--primary)' }}>{res.Sugar_Recovery}%</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {error && <div className="hint critical" style={{ marginTop: '1rem' }}>{error}</div>}
             <button className="btn-primary" style={{ marginTop: '2rem' }} onClick={reset}>
-              <RefreshCw size={18} /> New Analysis
+               New Analysis
             </button>
+          </motion.div>
+        )}
+
+        {step === 5 && analyticsData && (
+          <motion.div key="analytics" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card analytics-dashboard">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <h2><TrendingUp className="text-primary" /> Regional Insights - {analyticsData.month}</h2>
+              <button className="btn-secondary" onClick={() => setStep(1)}>Back to Analysis</button>
+            </div>
+
+            <div className="analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              <div className="analytics-section">
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--text-muted)' }}>🏆 Top Sucrose by Village</h3>
+                <div className="ranking-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {analyticsData.top_villages.length > 0 ? analyticsData.top_villages.map((v, i) => (
+                    <div key={i} className="ranking-item" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+                        <span style={{ fontWeight: 600 }}>{i + 1}. {v._id}</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{v.avg_sucrose.toFixed(2)}%</span>
+                      </div>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: 'var(--primary)', width: `${(v.avg_sucrose / 22) * 100}%`, opacity: 0.4 }} />
+                    </div>
+                  )) : <p>No data yet.</p>}
+                </div>
+              </div>
+
+              <div className="analytics-section">
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem', color: 'var(--text-muted)' }}>🌱 Best Performing Varieties</h3>
+                <div className="ranking-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {analyticsData.top_varieties.length > 0 ? analyticsData.top_varieties.map((v, i) => (
+                    <div key={i} className="ranking-item" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+                        <span style={{ fontWeight: 600 }}>{i + 1}. {v._id}</span>
+                        <span style={{ color: 'var(--success)', fontWeight: 700 }}>{v.avg_sucrose.toFixed(2)}%</span>
+                      </div>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, height: '4px', background: 'var(--success)', width: `${(v.avg_sucrose / 22) * 100}%`, opacity: 0.4 }} />
+                    </div>
+                  )) : <p>No data yet.</p>}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              <Package size={16} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Trends calculated from real-time MongoDB extraction logs.
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -430,33 +496,32 @@ function QualityBadge({ quality }) {
   const q = quality?.toLowerCase() || '';
   const isPoor = q.includes('poor');
   const isAvg = q.includes('average');
-  const color = isPoor ? 'var(--error)' : (isAvg ? 'var(--warning)' : 'var(--success)');
+  const color = isPoor ? '#e74c3c' : (isAvg ? '#f1c40f' : '#2ecc71');
   const Icon = isPoor ? XCircle : (isAvg ? AlertTriangle : CheckCircle);
-
   return (
-    <div className="quality-badge-hero">
-      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ color }}>
+    <div style={{ textAlign: 'center' }}>
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ color, marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
         <Icon size={64} />
       </motion.div>
-      <h2 style={{ color, fontSize: '3rem', fontWeight: 800, margin: '1rem 0' }}>{quality?.toUpperCase()}</h2>
+      <h2 style={{ color, fontSize: '2.5rem', fontWeight: 800 }}>{quality?.toUpperCase()}</h2>
     </div>
   );
 }
 
 function Gauge({ score }) {
   return (
-    <div className="gauge-container">
-      <div className="gauge-track">
+    <div style={{ marginTop: '1.5rem' }}>
+      <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', maxWidth: '300px', margin: '0 auto' }}>
         <motion.div
-          className="gauge-fill"
-          initial={{ width: 0 }}
-          animate={{ width: `${score}%` }}
-          style={{
-            background: score > 70 ? 'var(--success)' : (score > 40 ? 'var(--warning)' : 'var(--error)')
-          }}
+           initial={{ width: 0 }}
+           animate={{ width: `${score}%` }}
+           style={{
+             height: '100%',
+             background: score > 70 ? '#2ecc71' : (score > 40 ? '#f1c40f' : '#e74c3c')
+           }}
         />
       </div>
-      <span className="gauge-label">Quality Score: {score}%</span>
+      <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.7 }}>Quality Score: {score.toFixed(1)}%</p>
     </div>
   );
 }
