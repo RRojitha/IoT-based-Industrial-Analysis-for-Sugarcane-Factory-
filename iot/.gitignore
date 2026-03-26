@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+# Models
+*.pkl
+!.gitignore
+!backend/*.pkl
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# Logs
+*.txt
+*.json
+!package.json
+!composer.json
+!backend/requirements.txt
+!backend/varieties.txt
